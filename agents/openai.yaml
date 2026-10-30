@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paper Overview｜论文精读"
+  short_description: "按十一项流程讲解论文，核实方法、图示、官方代码与复现条件"
+  default_prompt: "使用 $paper-overview 按 11 项流程讲解这篇论文，包含流程图、框架图、官方代码核查和复现难度，并联系我的研究目标提出可验证的方向。"
