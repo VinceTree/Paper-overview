@@ -13,6 +13,7 @@
 - 对关键方法、公式、假设和评价条件的说明。
 - 清楚区分作者报告、材料核实、分析推断和研究建议。
 - 与研究类型相匹配的代码、数据及复现条件评估。
+- 先询问是否需要的交互式代码讲解，用具体样本逐步对照输入、关键计算与输出。
 
 ## 安装
 
@@ -87,6 +88,31 @@ git clone https://github.com/VinceTree/Paper-overview.git "$HOME/.agents/skills/
 
 逐项写作要求见[完整讲解模板](references/overview-template.md)。
 
+## 可选的交互式代码讲解
+
+有适用代码时，助手会先完成 11 项概览，在末尾询问：
+
+> 需要我结合代码，用一个具体样本按执行顺序讲一遍吗？可以选择“需要”或“暂时不用”。
+
+回答“需要”后，才开始对照代码：**样本与入口 → 关键计算 → 输出与下一轮**。
+每轮围绕一个阶段，用短片段、具体数值与形状变化解释，讲完等待你继续、追问或跳转。
+多轮系统会说明第二次调用时状态或缓存的变化；复杂对象可先缩成标明假设的玩具例子，
+再回到实际配置。回答“暂时不用”或尚未回答时，不展开代码讲解。
+
+也可以直接说：
+
+```text
+需要，结合官方代码，用一条具体样本按执行顺序讲一遍，每轮讲完等我继续。
+```
+
+如果最初的请求已明确要求对照代码，助手会直接开始，无需重复确认；要求一次讲完也会遵循。
+没有适用代码时不询问；官方实现缺失或无法访问时，会说明情况，并可让你选择按论文伪代码演示，
+不会把示意代码当成官方实现。代码讲解只涉及阅读与解释，不会自动安装依赖或运行实验。
+
+详细节奏与示例见[代码讲解指南](references/code-walkthrough.md)。这部分参考并改编自
+[skJack/kelip-paper-reading](https://github.com/skJack/kelip-paper-reading)，来源版本与 MIT 许可见
+[第三方声明](THIRD_PARTY_NOTICES.md)。
+
 ## 证据与范围
 
 - 尽可能阅读正文与相关附录；资料无法访问时，说明缺失内容和实际阅读范围。
@@ -106,11 +132,13 @@ Paper-overview/
 ├── README.md                         # 英文说明
 ├── README.zh-CN.md                   # 简体中文说明
 ├── SKILL.md                          # 技能元数据与执行流程
+├── THIRD_PARTY_NOTICES.md             # 改编来源与第三方许可
 ├── agents/
 │   └── openai.yaml                   # 展示信息与默认提示词
 └── references/
+    ├── code-walkthrough.md           # 用户确认后的交互式代码讲解
     ├── overview-template.md          # 11 项详细讲解模板
     └── verification.md               # 证据与复现核查要求
 ```
 
-当前技能指令与参考文件使用简体中文，输出语言可以在请求中指定。调整工作流程时，请同步检查 [SKILL.md](SKILL.md)、[讲解模板](references/overview-template.md)、[核查指南](references/verification.md) 以及两版 README 的一致性。
+当前技能指令与参考文件使用简体中文，输出语言可以在请求中指定。调整工作流程时，请同步检查 [SKILL.md](SKILL.md)、[讲解模板](references/overview-template.md)、[代码讲解指南](references/code-walkthrough.md)、[核查指南](references/verification.md) 以及两版 README 的一致性。

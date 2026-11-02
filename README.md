@@ -13,6 +13,7 @@ The skill connects **questions, mechanisms, and evidence**. It supports papers a
 - Explanations of key methods, equations, assumptions, and evaluation conditions.
 - A clear distinction between author-reported results, inspected materials, analytical inferences, and proposed research directions.
 - An assessment of available code, data, and reproduction requirements appropriate to the research type.
+- An optional interactive code walkthrough that asks first, then traces a concrete sample through inputs, key computations, and outputs.
 
 ## Installation
 
@@ -87,6 +88,32 @@ The two diagrams use Mermaid by default, with text diagrams as a fallback. Their
 
 See the [full explanation template](references/overview-template.md) for section-by-section guidance.
 
+## Optional interactive code walkthrough
+
+When applicable code is available, the assistant first completes the 11-section overview, then asks:
+
+> Would you like a code walkthrough that follows a concrete sample in execution order? You can answer “yes” or “not now.”
+
+Answering “yes” starts the walkthrough: **sample and entry point → key computations → output and the next iteration**.
+Each reply covers one stage using short snippets, concrete values, and shape changes, then waits for you to continue, ask a question, or jump ahead.
+For iterative systems, it explains what changes in the state or cache on the next call. Large objects can first be reduced to a clearly labeled toy example before returning to the actual configuration.
+An unanswered question or “not now” does not start the walkthrough.
+
+You can also request it directly:
+
+```text
+Yes, follow one concrete sample through the official code in execution order.
+Explain one stage per reply and wait for me to continue.
+```
+
+If your original request already asks for a code walkthrough, the assistant starts without asking again. You can also ask for the whole walkthrough in one reply.
+Papers without applicable code do not trigger the question. If the official implementation is missing or inaccessible, the assistant explains that limitation and can offer a paper-based pseudocode demonstration, clearly distinguished from official code.
+The walkthrough reads and explains code; it does not automatically install dependencies or run experiments.
+
+See the [code walkthrough guide](references/code-walkthrough.md) for pacing and an example. This guidance is adapted from
+[skJack/kelip-paper-reading](https://github.com/skJack/kelip-paper-reading); the source revision and MIT license are recorded in
+[third-party notices](THIRD_PARTY_NOTICES.md).
+
 ## Evidence and scope
 
 - Read the full paper and relevant appendices when accessible; disclose unavailable materials and the actual reading scope.
@@ -106,11 +133,13 @@ Paper-overview/
 ├── README.md                         # English guide
 ├── README.zh-CN.md                   # Simplified Chinese guide
 ├── SKILL.md                          # Skill metadata and workflow
+├── THIRD_PARTY_NOTICES.md             # Adaptation sources and third-party license
 ├── agents/
 │   └── openai.yaml                   # Display metadata and default prompt
 └── references/
+    ├── code-walkthrough.md           # Interactive code walkthrough after user opt-in
     ├── overview-template.md          # Detailed 11-section template
     └── verification.md               # Evidence and reproduction checks
 ```
 
-The skill instructions and references are currently written in Simplified Chinese. Output language can be specified in the request. When adapting the workflow, keep [SKILL.md](SKILL.md), the [template](references/overview-template.md), the [verification guide](references/verification.md), and both README versions consistent.
+The skill instructions and references are currently written in Simplified Chinese. Output language can be specified in the request. When adapting the workflow, keep [SKILL.md](SKILL.md), the [template](references/overview-template.md), the [code walkthrough guide](references/code-walkthrough.md), the [verification guide](references/verification.md), and both README versions consistent.
