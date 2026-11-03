@@ -10,6 +10,7 @@ The skill connects **questions, mechanisms, and evidence**. It supports papers a
 
 - A structured explanation grounded in the paper, appendices, and verified official resources.
 - Two separate diagrams: a **flowchart** for the sequence of steps and a **framework diagram** for components and relationships.
+- Every displayed figure is immediately explained: reading order, key elements, arrows or axes, a concrete path or comparison, and its relevance to the current question. A caption or image alone is insufficient.
 - Explanations of key methods, equations, assumptions, and evaluation conditions.
 - A clear distinction between author-reported results, inspected materials, analytical inferences, and proposed research directions.
 - An assessment of available code, data, and reproduction requirements appropriate to the research type.
