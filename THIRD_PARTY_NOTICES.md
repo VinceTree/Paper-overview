@@ -8,7 +8,15 @@ in [skJack/kelip-paper-reading](https://github.com/skJack/kelip-paper-reading),
 specifically `SKILL.md` and `references/examples.md` at commit
 `925953b15813f18b25eeb1a1dca9790f54a47498`.
 The adaptation integrates that guidance into paper-overview and adds an explicit
-user choice before starting a code walkthrough. The toy example is newly written.
+user choice before starting a code walkthrough. The current walkthrough uses real configuration dimensions. The new static example is newly written.
+
+`scripts/fetch_paper.py`, `scripts/extract_figures.py`, and `scripts/crop.py` are
+adapted from the same upstream revision. Changes include opt-in verified code
+retrieval and commit recording, version-bound caches, atomic publication, source
+path boundaries, preservation of user figures, full-page fallback, and PyMuPDF API
+compatibility. Documentation integrates original figures plus additional summary
+diagrams and requires a complete module table and at least two iterative calls.
+The upstream copyright and license below apply to the adapted scripts as well.
 
 The upstream project is distributed under the following license:
 

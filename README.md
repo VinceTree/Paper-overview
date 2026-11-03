@@ -35,7 +35,7 @@ New-Item -ItemType Directory -Force -Path "$HOME/.agents/skills" | Out-Null
 git clone https://github.com/VinceTree/Paper-overview.git "$HOME/.agents/skills/paper-overview"
 ```
 
-For a project-scoped installation, place the repository at `<project>/.agents/skills/paper-overview` instead. Keep `SKILL.md`, `references/`, and `agents/` together. If the skill does not appear, restart Codex.
+For a project-scoped installation, place the repository at `<project>/.agents/skills/paper-overview` instead. Keep `SKILL.md`, `scripts/`, `references/`, `requirements.txt`, `THIRD_PARTY_NOTICES.md`, and `agents/` together. If the skill does not appear, restart Codex.
 
 These paths follow the [official OpenAI skills documentation](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills). You can also ask the built-in `$skill-installer` to install the skill from this GitHub repository.
 
@@ -43,7 +43,24 @@ These paths follow the [official OpenAI skills documentation](https://learn.chat
 
 If your assistant can read this repository, ask it to read [SKILL.md](SKILL.md) and follow its linked references. Automatic discovery and invocation syntax depend on the host application.
 
-This repository contains instructions and reference documents. It has no application build step or bundled model runtime. Paper retrieval, PDF reading, and web verification use the tools available in your assistant.
+This repository includes material preparation tools (Python 3.10+ and PyMuPDF; Git is optional for code retrieval). It does not bundle a model runtime. Missing dependencies are reported; available web/PDF readers can be used as a fallback. See [material tools](references/material-tools.md).
+
+## Automatic material preparation
+
+At the start of reading, prepare the PDF, available raw/flattened LaTeX, page text, outline, metadata and inspected figure crops. Resolve titles and DOI pages to an official paper link first. Code links remain unverified candidates until checked against author sources.
+
+```text
+python scripts/fetch_paper.py 2510.10125v3 --root ./papers
+python scripts/fetch_paper.py <material-directory> --code <verified-repository> --fetch-code
+python scripts/extract_figures.py <material-directory> --dpi 220
+python scripts/crop.py <material-directory>/paper.pdf --page 4 0.08 0.10 0.92 0.65 -o detail.png
+```
+
+Run the code-fetch command only when entering a requested code walkthrough. `--code` records a caller-verified URL; `--fetch-code` explicitly enables cloning. `--code-ref` selects a tag/commit, and metadata records the actual commit. Git LFS downloads are disabled. Paper source code, datasets and weights are not executed or automatically installed/downloaded.
+
+User/project directory choices take precedence; otherwise the script uses `related_work/` when present, then `PAPERS_DIR`, then `papers/`. arXiv PDF and source use the same version, with separate version directories and PDF checksums. Original user figures are preserved in favor of a separate automatic directory. Crops require visual inspection and may need manual correction. See [material tools](references/material-tools.md) for fallback behavior and [the Ctrl-World static example](references/ctrl-world-walkthrough.md).
+
+For tool development, use a dedicated environment, install `requirements.txt`, and run `python -m unittest discover -s tests -v`. The tests use small PDF fixtures and a local Git repository, not models or datasets.
 
 ## Quick start
 
@@ -84,7 +101,7 @@ Each explanation begins with the paper's identity, version, publication status, 
 | 10 | Contributions and novelty | What differs from the closest prior work, and what evidence supports it? |
 | 11 | Concrete scenario | How does the problem and proposed approach play out in a specific case? |
 
-The two diagrams use Mermaid by default, with text diagrams as a fallback. Their structure follows the research: for example, a theoretical paper can show a proof workflow and proposition dependencies. Inapplicable sections retain their titles and explain why they do not apply.
+Sections 2 and 3 display the relevant original paper figures, with figure numbers, PDF pages, sources, and visual inspection, followed by two additional Mermaid summary diagrams (text diagrams as a fallback). The summaries explicitly map back to the original figures. Missing originals are disclosed. Their structure follows the research: for example, a theoretical paper can show a proof workflow and proposition dependencies. Inapplicable sections retain their titles and explain why they do not apply.
 
 See the [full explanation template](references/overview-template.md) for section-by-section guidance.
 
@@ -96,7 +113,7 @@ When applicable code is available, the assistant first completes the 11-section 
 
 Answering “yes” starts the walkthrough: **sample and entry point → key computations → output and the next iteration**.
 Each reply covers one stage using short snippets, concrete values, and shape changes, then waits for you to continue, ask a question, or jump ahead.
-For iterative systems, it explains what changes in the state or cache on the next call. Large objects can first be reduced to a clearly labeled toy example before returning to the actual configuration.
+A complete module table covers origin/initialization, total and trainable parameters with evidence, stage-specific updates, real input/output shapes and units, design reasons, and fixed-revision code locations. Walkthroughs use the actual configuration dimensions and accessible real samples, showing small slices of large tensors without shrinking their dimensions. Unknown values are disclosed rather than invented. Iterative systems trace at least the first and a subsequent call, including observation, state and cache changes; progress is tracked across replies.
 An unanswered question or “not now” does not start the walkthrough.
 
 You can also request it directly:
@@ -134,9 +151,14 @@ Paper-overview/
 ├── README.zh-CN.md                   # Simplified Chinese guide
 ├── SKILL.md                          # Skill metadata and workflow
 ├── THIRD_PARTY_NOTICES.md             # Adaptation sources and third-party license
+├── scripts/                         # fetch_paper.py / extract_figures.py / crop.py
+├── requirements.txt                 # PyMuPDF
+├── tests/                           # Offline behavioral checks
 ├── agents/
 │   └── openai.yaml                   # Display metadata and default prompt
 └── references/
+    ├── material-tools.md             # Material preparation and original figures
+    ├── ctrl-world-walkthrough.md      # Real-dimension static example
     ├── code-walkthrough.md           # Interactive code walkthrough after user opt-in
     ├── overview-template.md          # Detailed 11-section template
     └── verification.md               # Evidence and reproduction checks

@@ -35,7 +35,7 @@ New-Item -ItemType Directory -Force -Path "$HOME/.agents/skills" | Out-Null
 git clone https://github.com/VinceTree/Paper-overview.git "$HOME/.agents/skills/paper-overview"
 ```
 
-如只希望在某个项目中使用，将仓库放在 `<项目目录>/.agents/skills/paper-overview`。保留 `SKILL.md`、`references/` 和 `agents/` 的相对位置。如果技能没有出现，可重启 Codex。
+如只希望在某个项目中使用，将仓库放在 `<项目目录>/.agents/skills/paper-overview`。保留 `SKILL.md`、`scripts/`、`references/`、`requirements.txt`、第三方声明和 `agents/` 的相对位置。如果技能没有出现，可重启 Codex。
 
 上述路径依据 [OpenAI 官方技能文档](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills)。也可以让内置的 `$skill-installer` 从本 GitHub 仓库安装该技能。
 
@@ -43,7 +43,31 @@ git clone https://github.com/VinceTree/Paper-overview.git "$HOME/.agents/skills/
 
 如果你的助手可以读取此仓库，可以要求它先阅读 [SKILL.md](SKILL.md)，再按其中链接的参考文件执行。技能自动发现方式和调用语法取决于所用应用。
 
-本仓库提供指令与参考文档，没有应用构建步骤，也不包含模型运行环境。论文获取、PDF 阅读和联网核查使用助手当前可用的工具。
+本仓库提供材料准备工具，依赖 Python 3.10+ 与 PyMuPDF；获取代码时另需 Git，不包含模型运行环境。缺少依赖时说明情况并使用可用网页 / PDF 阅读工具，详见[材料工具指南](references/material-tools.md)。
+
+## 自动准备论文材料
+
+阅读开始时准备 PDF、可用原始与展开 LaTeX、逐页文本、大纲、元数据和经检查的裁图。
+标题或 DOI 先解析到官方论文地址；代码地址先作为候选，经作者来源核实后才可称为官方。
+
+```text
+python scripts/fetch_paper.py 2510.10125v3 --root ./papers
+python scripts/fetch_paper.py <材料目录> --code <已核实仓库> --fetch-code
+python scripts/extract_figures.py <材料目录> --dpi 220
+python scripts/crop.py <材料目录>/paper.pdf --page 4 0.08 0.10 0.92 0.65 -o detail.png
+```
+
+进入用户要求的代码讲解分支时才执行代码获取命令。`--code` 记录调用者核实过的地址，
+只有 `--fetch-code` 才启用克隆；`--code-ref` 可选择 tag / commit，元数据记录实际提交。
+关闭 Git LFS 自动下载；不执行论文代码，不自动下载数据集与权重或安装论文依赖。
+
+目录优先沿用用户及项目约定，否则依次使用已有 `related_work/`、`PAPERS_DIR`、`papers/`。
+PDF 与源码绑定同一 arXiv 版本，目录隔离版本并记录校验和；人工图表保留，自动裁图另存。
+裁图仍须亲自检查，必要时手动修复。降级行为见[材料工具指南](references/material-tools.md)，
+讲解深度示例见[Ctrl-World 静态实例](references/ctrl-world-walkthrough.md)。
+
+开发验证使用独立环境安装 `requirements.txt`，再执行 `python -m unittest discover -s tests -v`。
+测试使用小型 PDF 与本地 Git 仓库，不使用模型或数据集。
 
 ## 快速开始
 
@@ -84,7 +108,7 @@ git clone https://github.com/VinceTree/Paper-overview.git "$HOME/.agents/skills/
 | 10 | 创新点 | 相比最接近的已有工作，新意在哪里，有什么证据？ |
 | 11 | 问题的场景 | 在一个具体案例中，问题与方法怎样展开？ |
 
-两张图默认使用 Mermaid，不支持时使用文本图。图的内容随研究类型变化，例如理论论文可以绘制证明流程与命题依赖关系。不适用的项目保留标题并解释原因。
+第 2、3 项先显示对应论文原图，标注图号、PDF 页码和来源并亲自检查裁剪；再额外绘制两张 Mermaid 概括图，明确原图与概括图的对应关系，不支持 Mermaid 时用文本图。缺少对应原图时说明。图的内容随研究类型变化，例如理论论文可以绘制证明流程与命题依赖关系。不适用的项目保留标题并解释原因。
 
 逐项写作要求见[完整讲解模板](references/overview-template.md)。
 
@@ -96,8 +120,9 @@ git clone https://github.com/VinceTree/Paper-overview.git "$HOME/.agents/skills/
 
 回答“需要”后，才开始对照代码：**样本与入口 → 关键计算 → 输出与下一轮**。
 每轮围绕一个阶段，用短片段、具体数值与形状变化解释，讲完等待你继续、追问或跳转。
-多轮系统会说明第二次调用时状态或缓存的变化；复杂对象可先缩成标明假设的玩具例子，
-再回到实际配置。回答“暂时不用”或尚未回答时，不展开代码讲解。
+模块表须覆盖来源与初始化、总参数 / 可训练参数及依据、分阶段更新方式、实际输入输出与单位、设计理由和固定版本代码位置。
+全程使用真实配置尺寸与可访问的真实样本，大型张量只展示必要切片，不默认缩成玩具尺寸。缺失数值明确标未知。
+多轮系统至少走首次和一次后续调用，解释观测、状态、缓存的变化；跨回复记录完成进度。回答“暂时不用”或尚未回答时，不展开代码讲解。
 
 也可以直接说：
 
@@ -133,9 +158,14 @@ Paper-overview/
 ├── README.zh-CN.md                   # 简体中文说明
 ├── SKILL.md                          # 技能元数据与执行流程
 ├── THIRD_PARTY_NOTICES.md             # 改编来源与第三方许可
+├── scripts/                         # fetch_paper.py / extract_figures.py / crop.py
+├── requirements.txt                 # PyMuPDF
+├── tests/                           # Offline behavioral checks
 ├── agents/
 │   └── openai.yaml                   # 展示信息与默认提示词
 └── references/
+    ├── material-tools.md             # Material preparation and original figures
+    ├── ctrl-world-walkthrough.md      # Real-dimension static example
     ├── code-walkthrough.md           # 用户确认后的交互式代码讲解
     ├── overview-template.md          # 11 项详细讲解模板
     └── verification.md               # 证据与复现核查要求

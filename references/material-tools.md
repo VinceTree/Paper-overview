@@ -1,0 +1,62 @@
+# 论文材料与原图
+
+阅读开始时使用本技能自带工具准备论文材料；它们不执行论文仓库代码。
+Python 3.10+、PyMuPDF（见 `requirements.txt`）用于材料处理，Git 只在取代码时需要。
+依赖缺失时说明缺失项，继续使用可用的网页或 PDF 阅读工具；不要自动安装论文运行环境。
+工具路径相对技能目录，命令中的 `python` 使用当前可用的 Python 解释器。
+
+## 获取与缓存
+
+```text
+python scripts/fetch_paper.py 2510.10125v3 --root <材料父目录>
+python scripts/fetch_paper.py <PDF直链或本地PDF> --dest <材料目录>
+python scripts/fetch_paper.py <已有材料目录>
+```
+
+先识别论文。标题、DOI 或非 PDF 网页应先通过官方页面解析成 arXiv 链接或可读 PDF；
+获取工具不把任意网页当 PDF。目录遵循用户指定位置、项目约定（通过 `--dest` / `--root` 传入）；
+否则依次使用当前 `related_work/`、`PAPERS_DIR`、`papers/`。arXiv 默认目录名包含 ID 和版本；
+无法确认 arXiv 版本的 PDF 用内容哈希标识，不用猜测的版本下载源码。
+
+输出包括 `paper.pdf`、`paper.txt`、`source/`、`paper.tex`、`outline.md`、`meta.json` 和自动图表目录。
+`source/` 保留作者原始材料，展开后的 `paper.tex` 仅用于定位和阅读；复杂宏或表格仍要对照 PDF。
+元数据记录论文版本、来源、获取日期、PDF 校验和及源码状态。已有目录按原版本补齐材料；
+新版本使用独立目录。不同 PDF 不覆盖已有目录。下载失败时说明实际可读范围，再用可用来源继续。
+
+## 官方代码按需获取
+
+论文准备只记录 `code_candidates`，候选不能直接称为官方仓库。
+用户选择代码实例分支后，从作者项目页、论文链接和仓库归属核实地址，再执行：
+
+```text
+python scripts/fetch_paper.py <材料目录> --code <已核实URL> --fetch-code
+python scripts/fetch_paper.py <材料目录> --code <已核实URL> --fetch-code --code-ref <tag或commit>
+```
+
+`--code` 表示调用者已核实该地址；它只记录地址，仍须 `--fetch-code` 才会克隆。
+已记录并确认的地址可直接用 `--fetch-code`。`--code-dir` 可指定目录；默认是材料目录下的 `code/`。
+记录实际 `code_commit`，后续讲解用固定版本链接。已有代码目录仅复用同一 origin；
+要求不同版本时另选目录。关闭 LFS 自动下载，不获取权重，不安装依赖，不运行作者脚本。
+没有官方代码时按论文讲解；第三方实现另行标注，不能通过 `--code` 冒充官方归属。
+
+## 图表检查与显示
+
+```text
+python scripts/extract_figures.py <材料目录> --dpi 220
+python scripts/crop.py <材料目录>/paper.pdf --page 4 --grid
+python scripts/crop.py <材料目录>/paper.pdf --page 4 0.08 0.10 0.92 0.65 -o <局部图片.png>
+```
+
+坐标范围为 0–1。先看自动目录的 `_contact.png`，再亲自查看将要讲解的原图。
+`index.md` / `index.json` 记录图号、页码、图注、裁剪状态，以及能匹配到的 LaTeX 位置。
+未匹配到位置不伪造对应关系。图裁不出时使用整页；表裁不出时明确标记未裁出并手动裁剪；
+整篇没有识别到图注时生成逐页图片供检查。扫描 PDF 没有 OCR，不能把空文本当成已读正文。
+
+已有人工 `figures/` 时另用 `figures-auto/`，若它也非工具管理则继续选择独立目录。
+后续使用脚本实际输出的路径。自动重生成只更新上次索引管理的图片，另存的人工局部图保留。
+
+第 2、3 项各按“论文原图 → 图的读法 → 我们的概括图与对应关系”组织。
+标明图号、PDF 页码及来源；概括图注明依据论文重绘。两节共用原图时引用已显示的图片即可。
+没有对应原图时说明缺失，仍绘制有依据的概括图，不把自画图标为论文原图。
+用当前应用支持的方式实际显示图片；本地 Markdown 图片必须使用绝对路径，不能只写“见图 2”。
+无法内嵌时提供可打开的图片链接并说明显示限制。密集模块从 PDF 原页裁剪放大；刻度图只用于定位。
